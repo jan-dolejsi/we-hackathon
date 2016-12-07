@@ -22,9 +22,18 @@ def hello_world():
     """hello world"""
     return 'Hello World!'
 
-@app.route('/test')
-def test():
-    return 'Test!'
+@app.route('/status')
+def status():
+    return jsonify({
+        "insert": False,
+        "fetch": False,
+        "delete": False,
+        "list": False,
+        "pubsub": False,
+        "storage": False,
+        "query": False,
+        "search": False
+        })
 
 def __init__(self):
     self.ds = datastore.Client(project="hackathon-team-016")
