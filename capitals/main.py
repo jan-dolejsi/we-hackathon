@@ -25,10 +25,10 @@ def hello_world():
 @app.route('/api/status')
 def status():
     return jsonify({
-        "insert": False,
-        "fetch": False,
+        "insert": True,
+        "fetch": True,
         "delete": False,
-        "list": False,
+        "list": True,
         "pubsub": False,
         "storage": False,
         "query": False,
@@ -65,11 +65,10 @@ def insert_country(id):
     )
 
     logging.info("Satya - before put")
-
     returnVal = ds.put(entity)
     logging.info("Satya - after put")
 
-    #return make_response(returnVal)
+    return make_response('done')
 
 @app.route('/api/capitals', methods=['GET'])
 def list_countries():
@@ -84,24 +83,35 @@ def list_countries():
         allCountries.append(dict(entity))
     return jsonify(allCountries)
     
-@app.route('/api/capitals/id', methods=['GET'])
+@app.route('/api/capitals/<int:id>', methods=['GET'])
 def fetch_country(id):
     ds = datastore.Client(project="hackathon-team-016")
     kind = "Countries16"
 
     query = ds.query(kind=kind)
     query.order = ['id']
-    result = get_query_results(query, id)
+    result = get_fetch_results(query, id)
     return jsonify(result)
 
-@app.route('/api/capitals/id', methods=['DELETE'])
-def delete_country(self, id):
-    ds = datastore.Client(project="hackathon-team-016")
+@app.route('/api/capitals/<int:id>', methods=['DELETE'])
+def delete_country(id):
+    client = datastore.Client(project="hackathon-team-016")
     kind = "Countries16"
-    key = ds.key(kind, id)
-    entity = datastore.Entity(key)
-    entity.delete(key)
-    return 200
+    key = client.key(kind, str(id))
+    
+    logging.info(key)
+    logging.info("Satya - delete using client")
+    client.delete(key)
+    
+    #Fetch entity with id
+    query = client.query(kind=kind)
+    query.add_filter('id', "=", id)
+    entity = query.fetch()
+    logging.info(entity)
+    logging.info("Satya - Delete using entity")
+    entity.delete()
+
+    return "deleted"
 
 def get_fetch_results(query, id):
     results = list()
