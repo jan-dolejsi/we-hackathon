@@ -1,7 +1,7 @@
 import json
 import logging
-from flask import Flask, request
-from flask_cors import CORS
+from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS 
 from google.cloud import datastore
 
 app = Flask(__name__)
@@ -34,17 +34,22 @@ def insert_country():
     longitude = request.get_json()['location']['longitude']
     continent = request.get_json()['continent']
 
-    entity['name'] = name
-    entity['countryCode'] = countryCode
-    entity['country'] = country
-    entity['id'] = countryid
-    #entity['location'] = {latitude, longitude}
-    entity['continent'] = continent
-    
-    logging.info("I am here")
+    entity.update(
+        {
+            'name':name,
+            'countryCode':countryCode,
+            'country':country,
+            'id':countryid,
+            'continent':continent
+        }
+    )
 
-    ds.put(entity)
-    return 200
+    logging.info("Satya - before put")
+
+    resp = make_response(ds.put(entity), 200)
+    logging.info("Satya - after put")
+
+    return  resp
 
 @app.route('/country', methods=['GET'])
 def list_countries():
