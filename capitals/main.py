@@ -27,7 +27,7 @@ def status():
     return jsonify({
         "insert": True,
         "fetch": True,
-        "delete": False,
+        "delete": True,
         "list": True,
         "pubsub": False,
         "storage": False,
@@ -97,19 +97,18 @@ def fetch_country(id):
 def delete_country(id):
     client = datastore.Client(project="hackathon-team-016")
     kind = "Countries16"
-    key = client.key(kind, str(id))
-    
-    logging.info(key)
-    logging.info("Satya - delete using client")
-    client.delete(key)
-    
+        
     #Fetch entity with id
     query = client.query(kind=kind)
     query.add_filter('id', "=", id)
-    entity = query.fetch()
+    entities = list(query.fetch())
+    entity = entities[0]
+    deleteKey = entity.key
+    
+    logging.info(deleteKey)
     logging.info(entity)
-    logging.info("Satya - Delete using entity")
-    entity.delete()
+    logging.info("Satya - Delete using key")   
+    client.delete(deleteKey)
 
     return "deleted"
 
