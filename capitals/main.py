@@ -22,7 +22,7 @@ def hello_world():
     """hello world"""
     return 'Hello World!'
 
-@app.route('/status')
+@app.route('/api/status')
 def status():
     return jsonify({
         "insert": False,
@@ -39,8 +39,8 @@ def __init__(self):
     self.ds = datastore.Client(project="hackathon-team-016")
     self.kind = "Countries16"
 
-@app.route('/country/insert', methods=['PUT'])
-def insert_country():
+@app.route('/api/capitals/<int:id>', methods=['PUT'])
+def insert_country(id):
     ds = datastore.Client(project="hackathon-team-016")
     kind = "Countries16"
     key = ds.key(kind)
@@ -49,7 +49,7 @@ def insert_country():
     name = request.get_json()['name']
     countryCode = request.get_json()['countryCode']
     country = request.get_json()['country']
-    countryid = request.get_json()['id']
+    countryid = id
     latitude = request.get_json()['location']['latitude']
     longitude = request.get_json()['location']['longitude']
     continent = request.get_json()['continent']
@@ -69,9 +69,9 @@ def insert_country():
     returnVal = ds.put(entity)
     logging.info("Satya - after put")
 
-    return make_response(returnVal)
+    #return make_response(returnVal)
 
-@app.route('/country', methods=['GET'])
+@app.route('/api/capitals', methods=['GET'])
 def list_countries():
     ds = datastore.Client(project="hackathon-team-016")
     kind = "Countries16"
@@ -82,18 +82,19 @@ def list_countries():
     allCountries = list()
     for entity in list(query.fetch()):
         allCountries.append(dict(entity))
-    return allCountries
+    return jsonify(allCountries)
     
-@app.route('/country/id', methods=['GET'])
+@app.route('/api/capitals/id', methods=['GET'])
 def fetch_country(id):
     ds = datastore.Client(project="hackathon-team-016")
     kind = "Countries16"
 
     query = ds.query(kind=kind)
     query.order = ['id']
-    return get_query_results(query, id)
+    result = get_query_results(query, id)
+    return jsonify(result)
 
-@app.route('/country/delete/id', methods=['DELETE'])
+@app.route('/api/capitals/id', methods=['DELETE'])
 def delete_country(self, id):
     ds = datastore.Client(project="hackathon-team-016")
     kind = "Countries16"
