@@ -57,10 +57,10 @@ def insert_country():
 
     logging.info("Satya - before put")
 
-    resp = make_response(ds.put(entity), 200)
+    returnVal = ds.put(entity)
     logging.info("Satya - after put")
 
-    return  resp
+    return make_response(returnVal)
 
 @app.route('/country', methods=['GET'])
 def list_countries():
