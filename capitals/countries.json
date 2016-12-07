@@ -1,0 +1,46 @@
+[
+   {
+      "name":"Hargeisa",
+      "countryCode":"NULL",
+      "country":"Somaliland",
+      "id":1,
+      "location":{
+         "latitude":9.55,
+         "longitude":44.05
+      },
+      "continent":"Africa"
+   },
+   {
+      "name":"King Edward Point",
+      "countryCode":"GS",
+      "country":"South Georgia and South Sandwich Islands",
+      "id":2,
+      "location":{
+         "latitude":-54.283333,
+         "longitude":-36.5
+      },
+      "continent":"Antarctica"
+   },
+   {
+      "name":"Port-aux-Franais",
+      "countryCode":"TF",
+      "country":"French Southern and Antarctic Lands",
+      "id":3,
+      "location":{
+         "latitude":-49.35,
+         "longitude":70.216667
+      },
+      "continent":"Antarctica"
+   },
+   {
+      "name":"Jerusalem",
+      "countryCode":"PS",
+      "country":"Palestine",
+      "id":4,
+      "location":{
+         "latitude":31.766666666666666,
+         "longitude":35.233333
+      },
+      "continent":"Asia"
+   }
+   ]

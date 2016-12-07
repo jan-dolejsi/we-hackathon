@@ -6,6 +6,17 @@ from google.cloud import datastore
 
 app = Flask(__name__)
 
+@app.route('/parsejson')
+def parse_json():
+    with open('countries.json') as data_file:    
+        data = json.load(data_file)
+    mystring = "Start:"
+    for country in data:
+        mystring = mystring + "Countries,"
+        for attribute, value in country.iteritems():
+            mystring = mystring + attribute + ":" + str(value) + ", " 
+    return mystring
+    
 @app.route('/')
 def hello_world():
     """hello world"""
