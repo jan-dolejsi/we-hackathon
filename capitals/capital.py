@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from google.cloud import datastore
 
@@ -6,25 +7,57 @@ class Capital:
 
     def __init__(self):
         self.ds = datastore.Client(project="hackathon-team-016")
-        self.kind = "Capital"
+        self.kind = "Countries16"
 
-    def store_capitals(self, tbd):
+    @app.route('/country/insert', methods=['PUT'])
+    def insert_country(self):
         key = self.ds.key(self.kind)
         entity = datastore.Entity(key)
 
-        entity['tbd'] = tbd
-        entity['timestamp'] = datetime.utcnow()
+        name = request.get_json()['name']
+        countryCode = request.get_json()['countryCode']
+        country = request.get_json()['country']
+        countryid = request.get_json()['id']
+        latitude = request.get_json()['latitude']
+        longitude = request.get_json()['longitude']
+        continent = request.get_json()['continent']
 
-        return self.ds.put(entity)
+        entity['name'] = name
+        entity['countryCode'] = countryCode
+        entity['country'] = country
+        entity['id'] = countryid
+        entity['location'] = [latitude, longitude]
+        entity['continent'] = continent
+        
+        #return self.ds.put(entity)
+        return 200
 
-    def fetch_capitals(self):
+    @app.route('/country', methods=['GET'])
+    def list_countries(self):
         query = self.ds.query(kind=self.kind)
-        query.order = ['-timestamp']
-        return self.get_query_results(query)
+        query.order = ['id']
+        
+        allCountries = list()
+        for entity in list(query.fetch()):
+            allCountries.append(dict(entity))
+        return allCountries
+        
+    @app.route('/country/id', methods=['GET'])
+    def fetch_country(self, id):
+        query = self.ds.query(kind=self.kind)
+        query.order = ['id']
+        return self.get_query_results(query, id)
 
-    def get_query_results(self, query):
+    @app.route('/country/id', methods=['DELETE'])
+    def delete_country(self, id):
+        key = self.ds.key(self.kind, id)
+        entity = datastore.Entity(key)
+        entity.delete(key)
+        return 200
+
+    def get_fetch_results(self, query, id):
         results = list()
         for entity in list(query.fetch()):
-            results.append(dict(entity))
+            if entity["id"] == id:
+                results.append(dict(entity))
         return results
-
