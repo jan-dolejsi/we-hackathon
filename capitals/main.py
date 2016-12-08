@@ -164,6 +164,8 @@ def fetch_country(id):
 @app.route('/api/capitals/<int:id>/store', methods=['POST'])
 def store_country(id):
     bucketName = request.get_json()['bucket']
+
+    logging.info('Storing capital {} to bucket {}.'.format(id, bucketName))
     
     # Fetch entity with id
     ds = datastore.Client(project="hackathon-team-016")
