@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS 
 from google.cloud import datastore
@@ -94,7 +95,20 @@ def fetch_country(id):
     if len(result) == 0:
         return make_response("Capital not found", 404)
 
-    return jsonify(result)
+    entity = result[0]
+    geolocation = {}
+    geolocation['latitude'] = entity['latitude']
+    geolocation['longitude'] = entity['longitude']
+
+    capitalObj = {}
+    capitalObj['id'] = entity['id']
+    capitalObj['country'] = entity['country']
+    capitalObj['name'] = entity['name']
+    capitalObj['location'] = geolocation
+    capitalObj['countryCode'] = entity['countryCode']
+    capitalObj['continent'] = entity['continent']
+
+    return jsonify(capitalObj)
 
 @app.route('/api/capitals/<int:id>', methods=['DELETE'])
 def delete_country(id):
@@ -118,6 +132,7 @@ def delete_country(id):
         logging.info("Satya - Delete using key")   
         client.delete(deleteKey)
 
+        time.sleep(1)   #1 second delay to allow delete to happen before the test program checks it with GET
         return "deleted"
     else:
         return make_response("Capital record not found", 404)
@@ -136,6 +151,7 @@ def server_error(e):
     #return 'An internal error occurred.', 500
     return make_response('Unexpected error', 500)
 
+        
 if __name__ == '__main__':
     # Used for running locally
     app.run(host='127.0.0.1', port=8081, debug=True)
