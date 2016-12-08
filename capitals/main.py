@@ -19,8 +19,8 @@ def parse_json():
     
 @app.route('/')
 def hello_world():
-    """hello world"""
-    return 'Hello World!'
+    """hello team 16"""
+    return 'Hello Team 16!'
 
 @app.route('/api/status')
 def status():
@@ -41,41 +41,41 @@ def __init__(self):
 
 @app.route('/api/capitals/<int:id>', methods=['PUT'])
 def insert_country(id):
-    ds = datastore.Client(project="hackathon-team-016")
-    kind = "Countries16"
-    key = ds.key(kind)
-    entity = datastore.Entity(key)
-
     name = request.get_json()['name']
     countryCode = request.get_json()['countryCode']
     country = request.get_json()['country']
-    countryid = id
     latitude = request.get_json()['location']['latitude']
     longitude = request.get_json()['location']['longitude']
     continent = request.get_json()['continent']
+        
+    dsClient = datastore.Client(project="hackathon-team-016")
+    kind = "Countries16"
+    entitykey = dsClient.key(kind, id)
+    entity = datastore.Entity(key=entitykey)
 
     entity.update(
         {
             'name':name,
             'countryCode':countryCode,
             'country':country,
-            'id':countryid,
-            'continent':continent
+            'id':id,
+            'continent':continent,
+            'latitude':latitude,
+            'longitude':longitude
         }
     )
 
-    logging.info("Satya - before put")
-    returnVal = ds.put(entity)
-    logging.info("Satya - after put")
-
+    logging.info(entitykey)
+    logging.info(entity)
+    dsClient.put(entity)
+    
     return make_response('done')
 
 @app.route('/api/capitals', methods=['GET'])
 def list_countries():
-    ds = datastore.Client(project="hackathon-team-016")
+    dsClient = datastore.Client(project="hackathon-team-016")
     kind = "Countries16"
-
-    query = ds.query(kind=kind)
+    query = dsClient.query(kind=kind)
     query.order = ['id']
     
     allCountries = list()
