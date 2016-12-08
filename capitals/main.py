@@ -38,7 +38,7 @@ def status():
         "delete": True,
         "list": True,
         "pubsub": True,
-        "storage": False,
+        "storage": True,
         "query": True,
         "search": True
         })
@@ -164,9 +164,7 @@ def fetch_country(id):
 @app.route('/api/capitals/<int:id>/store', methods=['POST'])
 def store_country(id):
     bucketName = request.get_json()['bucket']
-    if bucketName[0:4] != "gs://":
-        bucketName = "gs://" + bucketName
-
+    
     # Fetch entity with id
     ds = datastore.Client(project="hackathon-team-016")
     kind = "Countries16"
@@ -176,27 +174,22 @@ def store_country(id):
     if len(result) == 0:
         return make_response("Capital not found", 404)
     entity = result[0]
+    jsonObj = json.dumps(entity)
 
-    # Check if the bucket exists
     gcs = storage.Client(project="hackathon-team-016")
 
     try:
+        # Check if the bucket exists
         bucket = gcs.get_bucket(bucketName)
-        filename = "capitalentity.txt"
         
-        # Write capital object to a file
-        with open(filename, 'w') as outfile:
-            json.dump(entity, outfile, sort_keys = True, indent = 4, ensure_ascii = False, separators=(',', ':'))
-
-        # Upload file to the bucket
-        blob = Blob(filename, bucket)
+        #store json to bucket
+        filename = "capital.json"
+        blob = Blob("capital", bucket)
         try:
-            with open(filename, 'rb') as input_file:
-                blob.upload_from_file(input_file)
-                return make_response("Stored", 200)
-        except IOError:
-            return make_response('Error: Cannot find the file {}'.format(filename), 405)
-                
+            blob.upload_from_string(jsonObj, content_type='applicaton/json')
+            return make_response("stored", 200)
+        except :
+            return make_response('Error: Cannot store json object', 404)
     except exceptions.NotFound:
         return make_response('Error: Bucket {} does not exist.'.format(bucketName), 404)
     except exceptions.BadRequest:
