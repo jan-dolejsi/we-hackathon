@@ -5,6 +5,8 @@ from flask import Flask, request, jsonify, make_response, render_template
 from flask_cors import CORS 
 from google.cloud import datastore
 import publisher
+from google.cloud import storage, exceptions
+from google.cloud.storage import Blob
 
 app = Flask(__name__)
 
@@ -158,6 +160,50 @@ def fetch_country(id):
     capitalObj['continent'] = entity['continent']
 
     return jsonify(capitalObj)
+
+@app.route('/api/capitals/<int:id>/store', methods=['POST'])
+def store_country(id):
+    bucketName = request.get_json()['bucket']
+    if bucketName[0:4] != "gs://":
+        bucketName = "gs://" + bucketName
+
+    # Fetch entity with id
+    ds = datastore.Client(project="hackathon-team-016")
+    kind = "Countries16"
+    query = ds.query(kind=kind)
+    query.order = ['id']
+    result = get_fetch_results(query, id)
+    if len(result) == 0:
+        return make_response("Capital not found", 404)
+    entity = result[0]
+
+    # Check if the bucket exists
+    gcs = storage.Client(project="hackathon-team-016")
+
+    try:
+        bucket = gcs.get_bucket(bucketName)
+        filename = "capitalentity.txt"
+        
+        # Write capital object to a file
+        with open(filename, 'w') as outfile:
+            json.dump(entity, outfile, sort_keys = True, indent = 4, ensure_ascii = False, separators=(',', ':'))
+
+        # Upload file to the bucket
+        blob = Blob(filename, bucket)
+        try:
+            with open(filename, 'rb') as input_file:
+                blob.upload_from_file(input_file)
+                return make_response("Stored", 200)
+        except IOError:
+            return make_response('Error: Cannot find the file {}'.format(filename), 405)
+                
+    except exceptions.NotFound:
+        return make_response('Error: Bucket {} does not exist.'.format(bucketName), 404)
+    except exceptions.BadRequest:
+        return make_response('Error: Invalid bucket name {}'.format(bucketName), 400)
+    except exceptions.Forbidden:
+        return make_response('Error: Forbidden, Access denied for bucket {}'.format(bucketName), 403)
+
 
 @app.route('/api/capitals/<int:id>', methods=['DELETE'])
 def delete_country(id):
