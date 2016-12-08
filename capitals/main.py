@@ -10,9 +10,9 @@ from google.cloud.storage import Blob
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/countries")
 def index():
-    return render_template('main.html')
+    return render_template('countries.html')
 
 @app.route('/parsejson')
 def parse_json():
