@@ -185,7 +185,7 @@ def store_country(id):
         bucket = gcs.get_bucket(bucketName)
         
         #store json to bucket
-        filename = "capital.json"
+        filename = str(id)
         blob = Blob("capital", bucket)
         try:
             blob.upload_from_string(jsonObj, content_type='applicaton/json')
