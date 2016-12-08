@@ -197,8 +197,7 @@ def get_fetch_results(query, id):
 def publish_capital(id):
     topic = request.get_json()['topic']
    
-    publisher.publish(id, topic)
-    return make_response("Not implemented yet", 500)
+    return publisher.publish(id, topic)
 
 @app.errorhandler(500)
 def server_error(e):
