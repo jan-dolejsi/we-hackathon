@@ -31,10 +31,13 @@ def publish(id, topicName):
     capitalObj['countryCode'] = entity['countryCode']
     capitalObj['continent'] = entity['continent']
 
-    pubsub_client = pubsub.Client("the-depot")
+    topic_project_name = topicName.split("/")[1]
+    pubsub_client = pubsub.Client(topic_project_name)
+
+    topicName = topicName.split("/")[3]
     topic = pubsub_client.topic(topicName)
 
-    print('Topic {}.'.format(topic.full_name))
+    print 'Topic {}.'.format(topic.full_name)
     #print('Postin {}.'.format(json.dumps(capitalObj)))
 
     message_id = topic.publish(json.dumps(capitalObj))
