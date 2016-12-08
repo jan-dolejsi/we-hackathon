@@ -4,6 +4,7 @@ import time
 from flask import Flask, request, jsonify, make_response, render_template
 from flask_cors import CORS 
 from google.cloud import datastore
+import publisher
 
 app = Flask(__name__)
 
@@ -34,10 +35,10 @@ def status():
         "fetch": True,
         "delete": True,
         "list": True,
-        "pubsub": False,
+        "pubsub": True,
         "storage": False,
-        "query": False,
-        "search": False
+        "query": True,
+        "search": True
         })
 
 def __init__(self):
@@ -78,15 +79,59 @@ def insert_country(id):
 
 @app.route('/api/capitals', methods=['GET'])
 def list_countries():
+    
+    queryparam = request.args.get('query', '')
+    searchparam = request.args.get('search', '')
+      
     dsClient = datastore.Client(project="hackathon-team-016")
     kind = "Countries16"
+
     query = dsClient.query(kind=kind)
-    query.order = ['id']
-    
     allCountries = list()
-    for entity in list(query.fetch()):
+    queryResults = list()
+
+    # No parameters - all data
+    if queryparam == "" and searchparam == "":
+        queryResults = list(query.fetch())
+    # Query parameter 
+    elif queryparam != "":
+        pos = queryparam.find(":")
+        prop = queryparam[:pos]
+        v = queryparam[pos+1:]
+        if (prop == "id"):
+            val = int(v)
+        elif prop == "latitude" or prop == "longitude":
+            val = float(v)
+        else:
+            val = v
+        query.add_filter(prop, "=", val)
+        queryResults = list(query.fetch())
+    # Search parameter
+    elif searchparam != "":
+        for entity in list(query.fetch()):
+            if str(entity["id"]) == searchparam or entity['name'] == searchparam or entity['country'] == searchparam or entity['countryCode'] == searchparam or entity['continent'] == searchparam or str(entity['latitude'])== searchparam or str(entity['longitude']) == searchparam:
+                queryResults.append(dict(entity))
+        
+    # Final Formatting of data into JSON with Locations
+    for entity in queryResults:
         allCountries.append(dict(entity))
-    return jsonify(allCountries)
+
+    data = []
+    for entity in allCountries:
+        item = {}
+        geoloc = {}
+        geoloc['latitude'] = entity['latitude']
+        geoloc['longitude'] = entity['longitude']
+        item['id'] = entity['id']
+        item['country'] = entity['country']
+        item['name'] = entity['name']
+        item['location'] = geoloc
+        item['countryCode'] = entity['countryCode']
+        item['continent'] = entity['continent']
+        data.append(item)
+
+    jsonCapitals = json.dumps(data)
+    return jsonCapitals
     
 @app.route('/api/capitals/<int:id>', methods=['GET'])
 def fetch_country(id):
@@ -147,6 +192,12 @@ def get_fetch_results(query, id):
         if entity["id"] == id:
             results.append(dict(entity))
     return results
+
+@app.route('/api/capitals/<int:id>/publish', methods=['POST'])
+def publish_capital(id):
+    topic = request.get_json()['topic']
+   
+    return publisher.publish(id, topic)
 
 @app.errorhandler(500)
 def server_error(e):
