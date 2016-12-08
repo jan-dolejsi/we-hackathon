@@ -4,6 +4,7 @@ import time
 from flask import Flask, request, jsonify, make_response, render_template
 from flask_cors import CORS 
 from google.cloud import datastore
+import publisher
 
 app = Flask(__name__)
 
@@ -34,7 +35,7 @@ def status():
         "fetch": True,
         "delete": True,
         "list": True,
-        "pubsub": False,
+        "pubsub": True,
         "storage": False,
         "query": False,
         "search": False
@@ -147,6 +148,13 @@ def get_fetch_results(query, id):
         if entity["id"] == id:
             results.append(dict(entity))
     return results
+
+@app.route('/api/capitals/<int:id>/publish', methods=['POST'])
+def publish_capital(id):
+    topic = request.get_json()['topic']
+   
+    publisher.publish(id, topic)
+    return make_response("Not implemented yet", 500)
 
 @app.errorhandler(500)
 def server_error(e):
