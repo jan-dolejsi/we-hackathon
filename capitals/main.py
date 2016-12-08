@@ -186,9 +186,10 @@ def store_country(id):
         
         #store json to bucket
         filename = str(id)
-        blob = Blob("capital", bucket)
+        blob = Blob(filename, bucket)
         try:
             blob.upload_from_string(jsonObj, content_type='applicaton/json')
+            logging.info("Blob stored")
             return make_response("stored", 200)
         except :
             return make_response('Error: Cannot store json object', 404)
