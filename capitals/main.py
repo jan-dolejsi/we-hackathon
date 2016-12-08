@@ -1,11 +1,15 @@
 import json
 import logging
 import time
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, render_template
 from flask_cors import CORS 
 from google.cloud import datastore
 
 app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return render_template('main.html')
 
 @app.route('/parsejson')
 def parse_json():
