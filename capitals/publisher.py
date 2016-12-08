@@ -7,7 +7,7 @@ import main
 
 def publish(id, topicName):
     logging.info('Publishing message {} to topic {}.'.format(id, topicName))
-    print('Publishing message {} to topic {}.'.format(id, topicName))
+    #print('Publishing message {} to topic {}.'.format(id, topicName))
 
     ds = datastore.Client(project="hackathon-team-016")
     kind = "Countries16"
@@ -37,7 +37,7 @@ def publish(id, topicName):
     topicName = topicName.split("/")[3]
     topic = pubsub_client.topic(topicName)
 
-    print 'Topic {}.'.format(topic.full_name)
+    #print 'Topic {}.'.format(topic.full_name)
     #print('Postin {}.'.format(json.dumps(capitalObj)))
 
     message_id = topic.publish(json.dumps(capitalObj))
