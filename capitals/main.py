@@ -27,8 +27,22 @@ def parse_json():
     
 @app.route('/')
 def hello_world():
-    """hello team 16"""
-    return 'Hello Team 16!'
+    return render_template('countries.html')
+
+@app.route('/api/sortedlist', methods=['GET'])
+def sorted_unique_list():
+    dsClient = datastore.Client(project="hackathon-team-016")
+    kind = "Countries16"
+    query = dsClient.query(kind=kind)
+    query.distinct_on = ['country']
+    query.order = ['country']
+
+    allCountries = list()
+    queryResults = query.fetch()
+    for entity in queryResults:
+        allCountries.append(dict(entity))
+
+    return json.dumps(allCountries)
 
 @app.route('/api/status')
 def status():
