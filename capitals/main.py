@@ -115,8 +115,12 @@ def list_countries():
                 queryResults.append(dict(entity))
         
     # Final Formatting of data into JSON with Locations
+    i = 1
     for entity in queryResults:
         allCountries.append(dict(entity))
+        i = i+1
+        if i > 20:
+            break
 
     data = []
     for entity in allCountries:
