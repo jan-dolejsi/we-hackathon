@@ -35,7 +35,7 @@
   
   <style>
   google-map {
-    height: 300px;
+    height: 60%;
     width: 100%;
   }
   </style>
@@ -48,8 +48,9 @@
 
 <!-- end of maps-->
                     <google-map latitude="-25.363" longitude="131.044"  api-key="AIzaSyB6D39YxZWnxU2XYK-SkXWSBgkXoxg36vE" zoom="1">
-                     <google-map-marker latitude="{{countryLocation.latitude}}" longitude="{{countryLocation.longitude}}" draggable="false" title="test">
-                     </google-map-marker>
+                        <template is="dom-repeat" items="{{capitals}}">
+                            <google-map-marker latitude="{{item.latitude}}" longitude="{{item.longitude}}"></google-map-marker>
+                        </template>
                      </google-map>
 
   <capital-service></capital-service>
@@ -78,15 +79,16 @@
                                    debounce-duration="300">
            </iron-ajax>
                 <template is="dom-repeat" items="{{capitals}}">
-                    <country-details
+                    <capital
                                 capital-name="{{item.name}}"
                                 country-code="{{item.countryCode}}"
                                 country-name="{{item.country}}"
                                 country-id="{{item.id}}"
+                                latitude = "{{item.latitude}}"
+                                longitude = "{{item.longitude}}"
                                 access-token="{{access_token}}"
-                                country-location="{{item.location}}"
                                 country-continent="{{item.continent}}"
-                        ></country-details>
+                        ></capital>
                 </template>
             </paper-header-panel>
         </template>
