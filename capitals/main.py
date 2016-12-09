@@ -189,8 +189,8 @@ def store_country(id):
         blob = Blob(filename, bucket)
         try:
             blob.upload_from_string(jsonObj, content_type='applicaton/json')
-            logging.info("Blob stored")
-            return make_response("stored", 200)
+            logging.info("File " + filename + "stored in bucket " + bucketName)
+            return make_response("Successfully stored in GCS", 200)
         except :
             return make_response('Error: Cannot store json object', 404)
     except exceptions.NotFound:
