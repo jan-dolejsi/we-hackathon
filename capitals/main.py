@@ -7,6 +7,7 @@ from google.cloud import datastore
 import publisher
 from google.cloud import storage, exceptions
 from google.cloud.storage import Blob
+import sys
 
 app = Flask(__name__)
 
@@ -188,10 +189,13 @@ def store_country(id):
         filename = str(id)
         blob = Blob(filename, bucket)
         try:
-            blob.upload_from_string(jsonObj, content_type='applicaton/json')
-            logging.info("File " + filename + "stored in bucket " + bucketName)
+            data = jsonObj.encode('utf-8')
+            blob.upload_from_string(data, content_type='text/plain')
+            logging.info("File " + filename + " stored in bucket " + bucketName)
             return make_response("Successfully stored in GCS", 200)
         except :
+            e = sys.exc_info()[0]
+            logging.info(e)
             return make_response('Error: Cannot store json object', 404)
     except exceptions.NotFound:
         return make_response('Error: Bucket {} does not exist.'.format(bucketName), 404)
