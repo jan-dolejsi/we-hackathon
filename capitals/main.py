@@ -7,7 +7,6 @@ from google.cloud import datastore
 import publisher
 from google.cloud import storage, exceptions
 from google.cloud.storage import Blob
-import sys
 
 app = Flask(__name__)
 
@@ -177,7 +176,20 @@ def store_country(id):
     if len(result) == 0:
         return make_response("Capital not found", 404)
     entity = result[0]
-    jsonObj = json.dumps(entity)
+
+    geolocation = {}
+    geolocation['latitude'] = entity['latitude']
+    geolocation['longitude'] = entity['longitude']
+
+    capitalObj = {}
+    capitalObj['id'] = entity['id']
+    capitalObj['country'] = entity['country']
+    capitalObj['name'] = entity['name']
+    capitalObj['location'] = geolocation
+    capitalObj['countryCode'] = entity['countryCode']
+    capitalObj['continent'] = entity['continent']
+
+    jsonObj = json.dumps(capitalObj)
 
     gcs = storage.Client(project="hackathon-team-016")
 
@@ -194,8 +206,6 @@ def store_country(id):
             logging.info("File " + filename + " stored in bucket " + bucketName)
             return make_response("Successfully stored in GCS", 200)
         except :
-            e = sys.exc_info()[0]
-            logging.info(e)
             return make_response('Error: Cannot store json object', 404)
     except exceptions.NotFound:
         return make_response('Error: Bucket {} does not exist.'.format(bucketName), 404)
