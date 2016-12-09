@@ -110,9 +110,61 @@ def list_countries():
         queryResults = list(query.fetch())
     # Search parameter
     elif searchparam != "":
-        for entity in list(query.fetch()):
-            if str(entity["id"]) == searchparam or entity['name'] == searchparam or entity['country'] == searchparam or entity['countryCode'] == searchparam or entity['continent'] == searchparam or str(entity['latitude'])== searchparam or str(entity['longitude']) == searchparam:
-                queryResults.append(dict(entity))
+        # Fire 7 queries for each column and append the results
+        results1 = list()
+        query1 = dsClient.query(kind=kind)
+        query1.add_filter("id", "=", searchparam)
+        results1 = list(query1.fetch())
+
+        results2 = list()
+        query2 = dsClient.query(kind=kind)
+        query2.add_filter("name", "=", searchparam)
+        results2 = list(query2.fetch())
+
+        results3 = list()
+        query3 = dsClient.query(kind=kind)
+        query3.add_filter("country", "=", searchparam)
+        results3 = list(query3.fetch())
+
+        results4 = list()
+        query4 = dsClient.query(kind=kind)
+        query4.add_filter("countryCode", "=", searchparam)
+        results4 = list(query4.fetch())
+
+        results5 = list()
+        query5 = dsClient.query(kind=kind)
+        query5.add_filter("continent", "=", searchparam)
+        results5 = list(query5.fetch())
+
+        results6 = list()
+        query6 = dsClient.query(kind=kind)
+        query6.add_filter("latitude", "=", searchparam)
+        results6 = list(query6.fetch())
+
+        results7 = list()
+        query7 = dsClient.query(kind=kind)
+        query7.add_filter("longitude", "=", searchparam)
+        results7 = list(query7.fetch())
+
+        for entity in results1:
+            queryResults.append(dict(entity))
+        for entity in results2:
+            queryResults.append(dict(entity))
+        for entity in results3:
+            queryResults.append(dict(entity))
+        for entity in results4:
+            queryResults.append(dict(entity))
+        for entity in results5:
+            queryResults.append(dict(entity))
+        for entity in results6:
+            queryResults.append(dict(entity))
+        for entity in results7:
+            queryResults.append(dict(entity))
+
+        # Get all records and filter on column values
+        # for entity in list(query.fetch()):
+        #     if str(entity["id"]) == searchparam or entity['name'] == searchparam or entity['country'] == searchparam or entity['countryCode'] == searchparam or entity['continent'] == searchparam or str(entity['latitude'])== searchparam or str(entity['longitude']) == searchparam:
+        #         queryResults.append(dict(entity))
         
     # Final Formatting of data into JSON with Locations
     i = 1
@@ -145,12 +197,16 @@ def fetch_country(id):
     kind = "Countries16"
 
     query = ds.query(kind=kind)
-    query.order = ['id']
-    result = get_fetch_results(query, id)
-    if len(result) == 0:
+    # result = get_fetch_results(query, id)
+    query.add_filter('id', "=", id)
+    results = list()
+    for entity in list(query.fetch()):
+        results.append(dict(entity))
+    
+    if len(results) == 0:
         return make_response("Capital not found", 404)
 
-    entity = result[0]
+    entity = results[0]
     geolocation = {}
     geolocation['latitude'] = entity['latitude']
     geolocation['longitude'] = entity['longitude']
@@ -241,8 +297,22 @@ def delete_country(id):
         logging.info("Satya - Delete using key")   
         client.delete(deleteKey)
 
-        time.sleep(1)   #1 second delay to allow delete to happen before the test program checks it with GET
-        return "deleted"
+        time.sleep(1)   #1 second delay to allow delete to happen before the GET
+
+        # try to get the deleted record to ensure it is deleted - try 3 times
+        numtries = 0
+        query = client.query(kind=kind)
+        query.add_filter('id', "=", id)
+        while numtries < 4:
+            results = list()
+            for entity in list(query.fetch()):
+                results.append(dict(entity))
+            if len(results) != 0:
+                numtries = numtries + 1
+            else:
+                break
+
+        return make_response("deleted", 200)
     else:
         return make_response("Capital record not found", 404)
 
