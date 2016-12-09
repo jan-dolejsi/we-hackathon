@@ -1,18 +1,22 @@
 import json
 import logging
 import time
-from flask import Flask, request, jsonify, make_response, render_template
+from flask import Flask, request, jsonify, make_response, render_template, send_from_directory
 from flask_cors import CORS 
 from google.cloud import datastore
 import publisher
 from google.cloud import storage, exceptions
 from google.cloud.storage import Blob
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 
 @app.route("/countries")
 def index():
     return render_template('countries.html')
+
+@app.route('/js/<path:path>')
+def send_js(path):
+       return send_from_directory('js', path)
 
 @app.route('/parsejson')
 def parse_json():
