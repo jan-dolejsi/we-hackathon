@@ -146,20 +146,7 @@ def list_countries():
         query7.add_filter("longitude", "=", searchparam)
         results7 = list(query7.fetch())
 
-        for entity in results1:
-            queryResults.append(dict(entity))
-        for entity in results2:
-            queryResults.append(dict(entity))
-        for entity in results3:
-            queryResults.append(dict(entity))
-        for entity in results4:
-            queryResults.append(dict(entity))
-        for entity in results5:
-            queryResults.append(dict(entity))
-        for entity in results6:
-            queryResults.append(dict(entity))
-        for entity in results7:
-            queryResults.append(dict(entity))
+        queryResults = results1 + results2 + results3 + results4 + results5 + results6 + results7
 
         # Get all records and filter on column values
         # for entity in list(query.fetch()):
